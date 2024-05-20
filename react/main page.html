@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Insurance</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        h2 {
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            background-color: #004080;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Insurance</h1>
+        <div>
+            <h2>Purchase Insurance</h2>
+            <input type="number" id="purchaseAmount" placeholder="Enter amount in ETH" />
+            <button onclick="purchaseInsurance()">Purchase</button>
+        </div>
+        <div>
+            <h2>Claim Insurance</h2>
+            <input type="number" id="claimAmount" placeholder="Enter claim amount in ETH" />
+            <button onclick="claimInsurance()">Claim</button>
+        </div>
+        <div>
+            <h2>Update Insurance Amount (Owner only)</h2>
+            <input type="text" id="userAddress" placeholder="Enter user address" />
+            <input type="number" id="newAmount" placeholder="Enter new amount in ETH" />
+            <button onclick="updateInsuranceAmount()">Update</button>
+        </div>
+        <div>
+            <h2>Refund Excess Insurance (Owner only)</h2>
+            <input type="text" id="refundUserAddress" placeholder="Enter user address" />
+            <button onclick="refundExcessInsurance()">Refund</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script>
+       
+
+        let web3;
+        let contract;
+
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+            } else {
+                alert('Please install MetaMask to use this dApp.');
+            }
+        });
+
+        async function purchaseInsurance() {
+            const accounts = await web3.eth.getAccounts();
+            const amount = document.getElementById('purchaseAmount').value;
+            await contract.methods.purchaseInsurance().send({ from: accounts[0], value: web3.utils.toWei(amount, 'ether') });
+        }
+
+        async function claimInsurance() {
+            const accounts = await web3.eth.getAccounts();
+            const amount = document.getElementById('claimAmount').value;
+            await contract.methods.claimInsurance(web3.utils.toWei(amount, 'ether')).send({ from: accounts[0] });
+        }
+
+        async function updateInsuranceAmount() {
+            const accounts = await web3.eth.getAccounts();
+            const user = document.getElementById('userAddress').value;
+            const newAmount = document.getElementById('newAmount').value;
+            await contract.methods.updateInsuranceAmount(user, web3.utils.toWei(newAmount, 'ether')).send({ from: accounts[0] });
+        }
+
+        async function refundExcessInsurance() {
+            const accounts = await web3.eth.getAccounts();
+            const user = document.getElementById('refundUserAddress').value;
+            await contract.methods.refundExcessInsurance(user).send({ from: accounts[0] });
+        }
+    </script>
+</body>
+</html>
